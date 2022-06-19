@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 import time
 import mediapipe as mp
 import tensorflow as tf
+from PIL import ImageFont, ImageDraw, Image
 
 mp_holistic = mp.solutions.holistic # Holistic model
 mp_drawing = mp.solutions.drawing_utils # Drawing utilities
@@ -17,11 +18,6 @@ def mediapipe_detection(image, model):
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR) # COLOR COVERSION RGB 2 BGR
     return image, results
 
-def draw_landmarks(image, results):
-    mp_drawing.draw_landmarks(image, results.face_landmarks, mp_holistic.FACEMESH_TESSELATION) # Draw face connections
-    mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_holistic.POSE_CONNECTIONS) # Draw pose connections
-    mp_drawing.draw_landmarks(image, results.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS) # Draw left hand connections
-    mp_drawing.draw_landmarks(image, results.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS) # Draw right hand con
 
 def draw_styled_landmarks(image, results):
     # Draw face connections
@@ -54,7 +50,7 @@ def extract_keypoints(results):
     return np.concatenate([pose, face, lh, rh])
 
 
-actions = np.array(['a', 'b', 'c'])
+actions = np.array(['ㄱ', 'ㄴ', 'ㄷ'])
 
 colors = [(245,117,16), (117,245,16), (16,117,245)]
 def prob_viz(res, actions, input_frame, colors):
@@ -65,14 +61,13 @@ def prob_viz(res, actions, input_frame, colors):
         
     return output_frame
 
-
-model = tf.keras.models.load_model('action.h5')
-
 sequence = []
 sentence = []
 threshold = 0.8
 
-cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+model = tf.keras.models.load_model('action_1.h5')
+
+cap = cv2.VideoCapture(0)
 # Set mediapipe model 
 with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
     while cap.isOpened():
@@ -92,12 +87,14 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
 #         sequence.insert(0,keypoints)
 #         sequence = sequence[:30]
         sequence.append(keypoints)
-        sequence = sequence[-10:]
+        sequence = sequence[-30:]
         
-        if len(sequence) == 10:
+        if len(sequence) == 30:
             res = model.predict(np.expand_dims(sequence, axis=0))[0]
             print(actions[np.argmax(res)])
             
+            
+        #3. Viz logic
             if res[np.argmax(res)] > threshold: 
                 if len(sentence) > 0: 
                     if actions[np.argmax(res)] != sentence[-1]:
@@ -110,10 +107,15 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
 
             # Viz probabilities
             image = prob_viz(res, actions, image, colors)
+
+            font=ImageFont.truetype("fonts/gulim.ttc",30)
+            image = Image.fromarray(image)
+            draw = ImageDraw.Draw(image)
+
+            draw.rectangle((0,0, 640, 40), (245, 117, 16), 3)
+            draw.text((0,0), actions[np.argmax(res)] , font=font, fill=(255,255,255))
         
-        cv2.rectangle(image, (0,0), (640, 40), (245, 117, 16), -1)
-        cv2.putText(image, ' '.join(sentence), (3,30), 
-                       cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+        image= np.array(image)
 
         # Show to screen
         cv2.imshow('OpenCV Feed', image)
@@ -123,6 +125,4 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
             break
     cap.release()
     cv2.destroyAllWindows()
-cap.release()
-cv2.destroyAllWindows()
 
