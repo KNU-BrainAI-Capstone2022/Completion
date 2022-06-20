@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 import os
-from matplotlib import pyplot as plt
 import time
 import mediapipe as mp
 from PIL import ImageFont, ImageDraw, Image
@@ -24,15 +23,6 @@ def mediapipe_detection(image, model):
     image.flags.writeable = True  # Image is now writeable
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)  # COLOR COVERSION RGB 2 BGR
     return image, results
-
-
-def draw_landmarks(image, results): # landmark(x,y,z) 추출. # 이거 없어도 되는거 아닌가? 뒤에 업데이트 있으니.
-    mp_drawing.draw_landmarks(image, results.face_landmarks, mp_holistic.FACEMESH_TESSELATION)  # Draw face connections
-    mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_holistic.POSE_CONNECTIONS)  # Draw pose connections
-    mp_drawing.draw_landmarks(image, results.left_hand_landmarks,
-                              mp_holistic.HAND_CONNECTIONS)  # Draw left hand connections
-    mp_drawing.draw_landmarks(image, results.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS)  # Draw right hand con
-
 
 def draw_styled_landmarks(image, results):
     # draw_landamarks Update.
