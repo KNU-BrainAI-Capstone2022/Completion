@@ -82,7 +82,7 @@ def extract_keypoints(results): # 평탄화 작업을 통해 하나의 array로 
 DATA_PATH = os.path.join('MP_Data')
 
 # Actions that we try to detect
-actions = np.array(['가', '나', '다'])
+actions = np.array(['안녕'])
 
 # Thirty videos worth of data
 no_sequences = 30

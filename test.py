@@ -50,7 +50,7 @@ def extract_keypoints(results):
     return np.concatenate([pose, face, lh, rh])
 
 
-actions = np.array(['ㄱ', 'ㄴ', 'ㄷ'])
+actions = np.array(['ㄱ','감사합니다','ㄴ','ㄷ','안녕','친구'])
 
 colors = [(245,117,16), (117,245,16), (16,117,245)]
 def prob_viz(res, actions, input_frame, colors):
@@ -65,7 +65,7 @@ sequence = []
 sentence = []
 threshold = 0.8
 
-model = tf.keras.models.load_model('action_1.h5')
+model = tf.keras.models.load_model('action.h5')
 
 cap = cv2.VideoCapture(0)
 # Set mediapipe model 
@@ -106,7 +106,7 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
                 sentence = sentence[-5:]
 
             # Viz probabilities
-            image = prob_viz(res, actions, image, colors)
+            #image = prob_viz(res, actions, image, colors)
 
             font=ImageFont.truetype("fonts/gulim.ttc",30)
             image = Image.fromarray(image)
