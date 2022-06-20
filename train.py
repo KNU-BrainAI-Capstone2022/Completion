@@ -42,7 +42,6 @@ y= to_categorical(labels).astype(int)
 X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.05)
 # test size : 5%
 
-# tensorboard을 plt 대신 사용함./ 이거 위치는 수정 좀 해야할 듯? 돌아갈라나
 log_dir = os.path.join('Logs')
 tb_callback = TensorBoard(log_dir=log_dir)
 
@@ -59,10 +58,7 @@ model.add(LSTM(64, return_sequences=False, activation='relu'))
 model.add(Dense(64, activation='relu'))
 model.add(Dense(32, activation='relu'))
 model.add(Dense(actions.shape[0], activation='softmax'))
-# actions.shape[0] = 3
 
-#res = [.7, 0.2, 0.1]
-#actions[np.argmax(res)]
 model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
 model.fit(X_train, y_train, epochs=250, callbacks=[tb_callback])
 
